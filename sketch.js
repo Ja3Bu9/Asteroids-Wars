@@ -7,6 +7,8 @@ let bg;
 var lasers= [];
 var game;
 var pixelated;
+var pew;
+var kevin;
 function preload(){
   pixelated = loadFont('pixelated_font/pixelated.ttf');
   shipimg = loadImage('img/ship.png')
@@ -16,6 +18,8 @@ function preload(){
   kwikib[3] = loadImage('img/asteroid3.png');
   kwikib[4] = loadImage('img/asteroid4.png');
   bg = loadImage('img/bg.jpg');
+kevin = loadSound('img/kevin.mp3')
+
 }
 function setup() {
   createCanvas(windowWidth, windowHeight);
@@ -24,10 +28,13 @@ function setup() {
   for (var i=0; i<20; i++){
   asteroids.push(new Asteroid());
 }
+soundFormats('mp3', 'ogg');
+pew = loadSound('img/PEW.mp3');
   
 }
 function Game(){
   this.state = 0;
+  
 }
 function draw() {
   background(bg);
@@ -56,13 +63,17 @@ function draw() {
 }
 
 function start() {
+  
   displayBeginGame();
   if (keyIsDown(32)) {
     game.state++; // go to tutorial
+  kevin.play();
+    
   }
 }
 
 function displayBeginGame() {
+  
   background(bg);
   textAlign(CENTER);
   fill(255);
@@ -76,6 +87,7 @@ function displayBeginGame() {
   textFont('monospace', 40);
   fill(255);
   text("press 'space' to play", width/2, height/2+40);
+  
 }
 
 function keyReleased(){
@@ -87,6 +99,8 @@ function keyReleased(){
 function keyPressed(){
   if (key == ' '){
     lasers.push(new Laser(ship.pos, ship.heading));
+    pew.play();
+
   }else if (keyCode == RIGHT_ARROW){
     ship.setRotation(0.1);
   } else if (keyCode == LEFT_ARROW){
