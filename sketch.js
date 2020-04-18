@@ -5,8 +5,10 @@ var kwikib = [];
 var ass;
 let bg;
 var lasers= [];
-
+var game;
+var pixelated;
 function preload(){
+  pixelated = loadFont('pixelated_font/pixelated.ttf');
   shipimg = loadImage('img/ship.png')
   kwikib[0] = loadImage('img/asteroid0.png');
   kwikib[1] = loadImage('img/asteroid1.png');
@@ -18,32 +20,62 @@ function preload(){
 function setup() {
   createCanvas(windowWidth, windowHeight);
   ship = new Ship();
+  game = new Game();
   for (var i=0; i<20; i++){
   asteroids.push(new Asteroid());
 }
-
+  
 }
-
+function Game(){
+  this.state = 0;
+}
 function draw() {
   background(bg);
-  for (var i=0 ; i<lasers.length; i++){
-    lasers[i].render();
-    lasers[i].update();
-
+  switch(game.state){
+    case 0:
+      start();
+      break;
+    case 1:
+      for (var i=0 ; i<lasers.length; i++){
+        lasers[i].render();
+        lasers[i].update();
+    
+      }
+      ship.render()
+      ship.turn();
+      ship.update();
+      ship.edges();
+      for (var i=0 ; i<asteroids.length; i++){
+        asteroids[i].render();
+        asteroids[i].update();
+        asteroids[i].edges();
+    
+      }
+    break;
   }
-  ship.render()
-  ship.turn();
-  ship.update();
-  ship.edges();
-  for (var i=0 ; i<asteroids.length; i++){
-    asteroids[i].render();
-    asteroids[i].update();
-    asteroids[i].edges();
+}
 
+function start() {
+  displayBeginGame();
+  if (keyIsDown(32)) {
+    game.state++; // go to tutorial
   }
+}
 
- 
+function displayBeginGame() {
+  background(bg);
+  textAlign(CENTER);
+  fill(255);
+  stroke(255);
+  if (frameCount%45 > 22) fill(0); // make text flash
+  else fill(255);
+  if (width > 1200) textFont(pixelated, 200);
+  else textFont(pixelated, 100);
+  text('BOUBEN BY JA3BU9 & GITSALAH', width/2, height/2-100);
 
+  textFont('monospace', 40);
+  fill(255);
+  text("press 'space' to play", width/2, height/2+40);
 }
 
 function keyReleased(){
