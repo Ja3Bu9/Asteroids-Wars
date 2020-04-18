@@ -4,6 +4,7 @@ var asteroids = [];
 var kwikib = [];
 var ass;
 let bg;
+var lasers= [];
 
 function preload(){
   shipimg = loadImage('img/ship.png')
@@ -25,6 +26,11 @@ function setup() {
 
 function draw() {
   background(bg);
+  for (var i=0 ; i<lasers.length; i++){
+    lasers[i].render();
+    lasers[i].update();
+
+  }
   ship.render()
   ship.turn();
   ship.update();
@@ -36,6 +42,8 @@ function draw() {
 
   }
 
+ 
+
 }
 
 function keyReleased(){
@@ -45,14 +53,19 @@ function keyReleased(){
 }
 
 function keyPressed(){
-  if (keyCode == RIGHT_ARROW){
+  if (key == ' '){
+    lasers.push(new Laser(ship.pos, ship.heading));
+  }else if (keyCode == RIGHT_ARROW){
     ship.setRotation(0.1);
-  }  if (keyCode == LEFT_ARROW){
+  } else if (keyCode == LEFT_ARROW){
     ship.setRotation(-0.1)
-  }if (keyCode == UP_ARROW){
+  }else if (keyCode == UP_ARROW){
     ship.boosting(true);
   }
 }
+
+
+
 
 function Asteroid(){
   this.pos = createVector(random(width),random(height));
@@ -150,6 +163,23 @@ function Ship() {
   
   this.turn = function(){
     this.heading+= this.rotation;
+  }
+
+}
+function Laser(spos, angle){
+  this.pos = createVector(spos.x, spos.y);
+  this.vel = p5.Vector.fromAngle(angle);
+  this.vel.mult(10);
+
+  this.update = function(){
+    this.pos.add(this.vel);
+  }
+  this.render = function(){
+    push()
+    stroke(255);
+    strokeWeight(4);
+    point(this.pos.x, this.pos.y)
+    pop()
   }
 
 }
