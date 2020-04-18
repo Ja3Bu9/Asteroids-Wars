@@ -2,7 +2,8 @@ var ship;
 var shipimg;
 var asteroids = [];
 var kwikib = [];
-var ass
+var ass;
+let bg;
 
 function preload(){
   shipimg = loadImage('img/ship.png')
@@ -11,6 +12,7 @@ function preload(){
   kwikib[2] = loadImage('img/asteroid2.png');
   kwikib[3] = loadImage('img/asteroid3.png');
   kwikib[4] = loadImage('img/asteroid4.png');
+  bg = loadImage('img/bg.jpg');
 }
 function setup() {
   createCanvas(windowWidth, windowHeight);
@@ -22,7 +24,7 @@ function setup() {
 }
 
 function draw() {
-  background(220,19,100);
+  background(bg);
   ship.render()
   ship.turn();
   ship.update();
