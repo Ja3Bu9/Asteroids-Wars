@@ -1,23 +1,38 @@
 var ship;
 var shipimg;
+var asteroids = [];
+var kwikib = [];
+var ass
 
 function preload(){
   shipimg = loadImage('img/ship.png')
+  kwikib[0] = loadImage('img/asteroid0.png');
+  kwikib[1] = loadImage('img/asteroid1.png');
+  kwikib[2] = loadImage('img/asteroid2.png');
+  kwikib[3] = loadImage('img/asteroid3.png');
+  kwikib[4] = loadImage('img/asteroid4.png');
 }
 function setup() {
-  // put setup code here
   createCanvas(windowWidth, windowHeight);
   ship = new Ship();
+  for (var i=0; i<20; i++){
+  asteroids.push(new Asteroid());
+}
 
 }
 
 function draw() {
-  // put drawing code here
   background(220,19,100);
   ship.render()
   ship.turn();
   ship.update();
   ship.edges();
+  for (var i=0 ; i<asteroids.length; i++){
+    asteroids[i].render();
+    asteroids[i].update();
+    asteroids[i].edges();
+
+  }
 
 }
 
@@ -36,6 +51,42 @@ function keyPressed(){
     ship.boosting(true);
   }
 }
+
+function Asteroid(){
+  this.pos = createVector(random(width),random(height));
+  this.r = random(40,200);
+  this.vel = p5.Vector.random2D();
+  var r =floor(random(0, kwikib.length));
+
+  this.update = function(){
+    this.pos.add(this.vel);
+  }
+
+
+  this.render= function (){
+    push();
+    imageMode(CENTER)
+
+    translate(this.pos.x, this.pos.y)
+    image(kwikib[r], 0, 0,this.r,this.r)
+    pop();
+  }
+
+  this.edges = function(){
+    if (this.pos.x > width + this.r){
+      this.pos.x = -this.r;
+    } else if (this.pos.x < -this.r){
+      this.pos.x = width +this.r;
+    }
+
+    if (this.pos.y > height + this.r){
+      this.pos.y = -this.r;
+    } else if (this.pos.y < -this.r){
+      this.pos.y = height +this.r;
+    }
+  }
+}
+
 
 function Ship() {
   this.pos = createVector(width/2, height/2);
@@ -66,10 +117,12 @@ function Ship() {
   
 
   this.render = function(){
+    push();
     translate(this.pos.x, this.pos.y)
     imageMode(CENTER)
     rotate(this.heading + PI/2)
     image(shipimg, 0, 0,this.r,this.r+this.r*1/3)
+    pop();
   }
 
 
@@ -96,4 +149,5 @@ function Ship() {
   this.turn = function(){
     this.heading+= this.rotation;
   }
+
 }
