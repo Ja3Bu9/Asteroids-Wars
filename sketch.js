@@ -9,6 +9,7 @@ var game;
 var pixelated;
 var pew;
 var kevin;
+var lol;
 
 function preload() {
   pixelated = loadFont('pixelated_font/pixelated.ttf');
@@ -20,32 +21,34 @@ function preload() {
   kwikib[4] = loadImage('img/asteroid4.png');
   bg = loadImage('img/bg.jpg');
   kevin = loadSound('img/kevin.mp3')
+  lol = loadSound('img/loludied.mp3')
+  pew = loadSound('img/PEW.mp3');
+
 
 }
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
-  ship = new Ship();
   game = new Game();
+  ship = new Ship();
   for (var i = 0; i < 20; i++) {
     asteroids.push(new Asteroid());
   }
   soundFormats('mp3', 'ogg');
-  pew = loadSound('img/PEW.mp3');
 
 }
 
 function RESET(){
+  game = new Game();
   asteroids.length = 0;
 
   ship = new Ship();
-  game = new Game();
   for (let i = 0; i < 20; i++) {
     asteroids.push(new Asteroid());
   }
+  lol.stop();
  
 }
-
 
 
 function Game() {
@@ -85,10 +88,12 @@ function draw() {
       ship.edges();
       for (var i = 0; i < asteroids.length; i++) {
         if (ship.hits(asteroids[i])){
+          
+          kevin.stop();
+          
 
           console.log('oops!')
-          kevin.stop();
-          game.state=0;
+          
           RESET();
           
         }
@@ -106,12 +111,39 @@ function start() {
   displayBeginGame();
   if (keyIsDown(ENTER)) {
     game.state++; // go to tutorial
+    lol.stop();
     kevin.play();
 
   }
 }
 
 function displayBeginGame() {
+  if(lol.isPlaying()){
+    
+  }else {
+  lol.play()
+
+  }
+  background(bg);
+  textAlign(CENTER);
+  fill(255);
+  stroke(255);
+  if (frameCount % 45 > 22) fill(0); // make text flash
+  else fill(255);
+  if (width > 1200) textFont(pixelated, 200);
+  else textFont(pixelated, 100);
+  text('Avoid Asteroids', width / 2, height / 2 - 100);
+
+  textFont(pixelated, 30);
+  text("Created by JA3BU9 & GITSALAH", width / 2, height / 2 + 400);
+
+  textFont('monospace', 40);
+  fill(255);
+  text("press 'ENTER' to play", width / 2, height / 2 + 40);
+
+}
+
+function gameOver() {
 
   background(bg);
   textAlign(CENTER);
@@ -121,7 +153,7 @@ function displayBeginGame() {
   else fill(255);
   if (width > 1200) textFont(pixelated, 200);
   else textFont(pixelated, 100);
-  text('BOUBEN BY JA3BU9 & GITSALAH', width / 2, height / 2 - 100);
+  text('LOL U DIED !!', width / 2, height / 2 - 100);
 
   textFont('monospace', 40);
   fill(255);
