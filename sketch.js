@@ -4,12 +4,13 @@ var asteroids = [];
 var kwikib = [];
 var ass;
 let bg;
-var lasers= [];
+var lasers = [];
 var game;
 var pixelated;
 var pew;
 var kevin;
-function preload(){
+
+function preload() {
   pixelated = loadFont('pixelated_font/pixelated.ttf');
   shipimg = loadImage('img/ship.png')
   kwikib[0] = loadImage('img/asteroid0.png');
@@ -18,214 +19,295 @@ function preload(){
   kwikib[3] = loadImage('img/asteroid3.png');
   kwikib[4] = loadImage('img/asteroid4.png');
   bg = loadImage('img/bg.jpg');
-kevin = loadSound('img/kevin.mp3')
+  kevin = loadSound('img/kevin.mp3')
 
 }
+
 function setup() {
   createCanvas(windowWidth, windowHeight);
   ship = new Ship();
   game = new Game();
-  for (var i=0; i<20; i++){
-  asteroids.push(new Asteroid());
+  for (var i = 0; i < 20; i++) {
+    asteroids.push(new Asteroid());
+  }
+  soundFormats('mp3', 'ogg');
+  pew = loadSound('img/PEW.mp3');
+
 }
-soundFormats('mp3', 'ogg');
-pew = loadSound('img/PEW.mp3');
-  
+
+function RESET(){
+  asteroids.length = 0;
+
+  ship = new Ship();
+  game = new Game();
+  for (let i = 0; i < 20; i++) {
+    asteroids.push(new Asteroid());
+  }
+ 
 }
-function Game(){
+
+
+
+function Game() {
   this.state = 0;
-  
+
 }
+
 function draw() {
   background(bg);
-  switch(game.state){
+  switch (game.state) {
     case 0:
       start();
       break;
     case 1:
-      for (var i=0 ; i<lasers.length; i++){
+      for (var i = lasers.length-1 ; i >=0; i--) {
         lasers[i].render();
         lasers[i].update();
-    
+
+        for (var j = asteroids.length - 1 ; j >= 0 ; j--) {
+
+          if (lasers[i].hits(asteroids[j])) {
+            if (asteroids[j].r > 50){
+
+            var newAsteroids = asteroids[j].breakup();
+            console.log(newAsteroids);
+            asteroids = asteroids.concat(newAsteroids);
+          } 
+            asteroids.splice(j, 1);
+            lasers.splice(i,1);
+            break;
+          }
+        }
       }
       ship.render()
       ship.turn();
       ship.update();
       ship.edges();
-      for (var i=0 ; i<asteroids.length; i++){
+      for (var i = 0; i < asteroids.length; i++) {
+        if (ship.hits(asteroids[i])){
+
+          console.log('oops!')
+          kevin.stop();
+          game.state=0;
+          RESET();
+          
+        }
         asteroids[i].render();
         asteroids[i].update();
         asteroids[i].edges();
-    
+
       }
-    break;
+      break;
   }
 }
 
 function start() {
-  
+
   displayBeginGame();
-  if (keyIsDown(32)) {
+  if (keyIsDown(ENTER)) {
     game.state++; // go to tutorial
-  kevin.play();
-    
+    kevin.play();
+
   }
 }
 
 function displayBeginGame() {
-  
+
   background(bg);
   textAlign(CENTER);
   fill(255);
   stroke(255);
-  if (frameCount%45 > 22) fill(0); // make text flash
+  if (frameCount % 45 > 22) fill(0); // make text flash
   else fill(255);
   if (width > 1200) textFont(pixelated, 200);
   else textFont(pixelated, 100);
-  text('BOUBEN BY JA3BU9 & GITSALAH', width/2, height/2-100);
+  text('BOUBEN BY JA3BU9 & GITSALAH', width / 2, height / 2 - 100);
 
   textFont('monospace', 40);
   fill(255);
-  text("press 'space' to play", width/2, height/2+40);
-  
+  text("press 'ENTER' to play", width / 2, height / 2 + 40);
+
 }
 
-function keyReleased(){
+function keyReleased() {
   ship.setRotation(0);
   ship.boosting(false)
 
 }
 
-function keyPressed(){
-  if (key == ' '){
+function keyPressed() {
+  if (keyCode == UP_ARROW) {
+    ship.boosting(true);
+    
+  } else if (key == ' ') {
     lasers.push(new Laser(ship.pos, ship.heading));
     pew.play();
 
-  }else if (keyCode == RIGHT_ARROW){
+  } else if (keyCode == RIGHT_ARROW) {
     ship.setRotation(0.1);
-  } else if (keyCode == LEFT_ARROW){
+  } else if (keyCode == LEFT_ARROW) {
     ship.setRotation(-0.1)
-  }else if (keyCode == UP_ARROW){
-    ship.boosting(true);
-  }
+  } 
 }
 
 
 
 
-function Asteroid(){
-  this.pos = createVector(random(width),random(height));
-  this.r = random(40,200);
-  this.vel = p5.Vector.random2D();
-  var r =floor(random(0, kwikib.length));
+function Asteroid(pos, s) {
+  if (pos) {
+    this.pos = pos.copy();
+  } else {
+    this.pos = createVector(random(width), random(height));
+  }
+  if (s){
+     this.r = s*0.5;
 
-  this.update = function(){
+  } else {
+  this.r = random(40, 200);
+
+  }
+  this.vel = p5.Vector.random2D();
+  var r = floor(random(0, kwikib.length));
+
+  this.update = function () {
     this.pos.add(this.vel);
+
   }
 
 
-  this.render= function (){
+  this.render = function () {
     push();
     imageMode(CENTER)
 
     translate(this.pos.x, this.pos.y)
-    image(kwikib[r], 0, 0,this.r,this.r)
+    image(kwikib[r], 0, 0, this.r, this.r)
     pop();
   }
 
-  this.edges = function(){
-    if (this.pos.x > width + this.r){
+  this.breakup = function () {
+    var newA = [];
+    newA[0] = new Asteroid(this.pos, this.r);
+    newA[1] = new Asteroid(this.pos, this.r);
+    return newA;
+
+
+  }
+
+
+
+  this.edges = function () {
+    if (this.pos.x > width + this.r) {
       this.pos.x = -this.r;
-    } else if (this.pos.x < -this.r){
-      this.pos.x = width +this.r;
+    } else if (this.pos.x < -this.r) {
+      this.pos.x = width + this.r;
     }
 
-    if (this.pos.y > height + this.r){
+    if (this.pos.y > height + this.r) {
       this.pos.y = -this.r;
-    } else if (this.pos.y < -this.r){
-      this.pos.y = height +this.r;
+    } else if (this.pos.y < -this.r) {
+      this.pos.y = height + this.r;
     }
   }
 }
 
 
 function Ship() {
-  this.pos = createVector(width/2, height/2);
+  this.pos = createVector(width / 2, height / 2);
   this.r = 80;
   this.heading = 0;
   this.rotation = 0;
-  this.vel = createVector(1,0);
+  this.vel = createVector(1, 0);
   this.isBoosting = false;
 
 
-  this.boosting = function(b){
+  this.boosting = function (b) {
     this.isBoosting = b;
   }
 
-  this.update = function(){
-    if (this.isBoosting){
+  this.update = function () {
+    if (this.isBoosting) {
       this.boost();
     }
     this.pos.add(this.vel);
 
-      this.vel.mult(0.97)
+    this.vel.mult(0.97)
   }
-  this.boost = function(){
+  this.boost = function () {
     var force = p5.Vector.fromAngle(this.heading);
     force.mult(0.5)
     this.vel.add(force);
   }
-  
 
-  this.render = function(){
+
+  this.hits = function(asteroid){
+    var d = dist (this.pos.x, this.pos.y , asteroid.pos.x, asteroid.pos.y)
+    if (d< (this.r + asteroid.r)/2){
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+
+  this.render = function () {
     push();
     translate(this.pos.x, this.pos.y)
     imageMode(CENTER)
-    rotate(this.heading + PI/2)
-    image(shipimg, 0, 0,this.r,this.r+this.r*1/3)
+    rotate(this.heading + PI / 2)
+    image(shipimg, 0, 0, this.r, this.r + this.r * 1 / 3)
     pop();
   }
 
 
-  this.edges = function(){
-    if (this.pos.x > width + this.r){
+  this.edges = function () {
+    if (this.pos.x > width + this.r) {
       this.pos.x = -this.r;
-    } else if (this.pos.x < -this.r){
-      this.pos.x = width +this.r;
+    } else if (this.pos.x < -this.r) {
+      this.pos.x = width + this.r;
     }
 
-    if (this.pos.y > height + this.r){
+    if (this.pos.y > height + this.r) {
       this.pos.y = -this.r;
-    } else if (this.pos.y < -this.r){
-      this.pos.y = height +this.r;
+    } else if (this.pos.y < -this.r) {
+      this.pos.y = height + this.r;
     }
   }
 
 
-  this.setRotation = function(a){
+  this.setRotation = function (a) {
     this.rotation = a;
   }
 
-  
-  this.turn = function(){
-    this.heading+= this.rotation;
+
+  this.turn = function () {
+    this.heading += this.rotation;
   }
 
 }
-function Laser(spos, angle){
+
+function Laser(spos, angle) {
   this.pos = createVector(spos.x, spos.y);
   this.vel = p5.Vector.fromAngle(angle);
   this.vel.mult(10);
 
-  this.update = function(){
+  this.update = function () {
     this.pos.add(this.vel);
   }
-  this.render = function(){
+  this.render = function () {
     push()
     stroke(255);
     strokeWeight(4);
     point(this.pos.x, this.pos.y)
     pop()
+  }
+
+  this.hits = function (asteroid) {
+    var d = dist(this.pos.x, this.pos.y, asteroid.pos.x, asteroid.pos.y);
+    if (d < asteroid.r) {
+      return true;
+    } else {
+      return false;
+    }
   }
 
 }
