@@ -10,6 +10,7 @@ var pixelated;
 var pew;
 var kevin;
 var lol;
+var ifgameover = 0;
 
 function preload() {
   pixelated = loadFont('pixelated_font/pixelated.ttf');
@@ -31,7 +32,7 @@ function setup() {
   createCanvas(windowWidth, windowHeight);
   game = new Game();
   ship = new Ship();
-  for (var i = 0; i < 20; i++) {
+  for (var i = 0; i < 50; i++) {
     asteroids.push(new Asteroid());
   }
   soundFormats('mp3', 'ogg');
@@ -43,7 +44,7 @@ function RESET(){
   asteroids.length = 0;
 
   ship = new Ship();
-  for (let i = 0; i < 20; i++) {
+  for (let i = 0; i < 50; i++) {
     asteroids.push(new Asteroid());
   }
   lol.stop();
@@ -87,23 +88,24 @@ function draw() {
       ship.update();
       ship.edges();
       for (var i = 0; i < asteroids.length; i++) {
+        asteroids[i].render();
+        asteroids[i].update();
+        asteroids[i].edges();
         if (ship.hits(asteroids[i])){
-          
+          ifgameover = 1;
           kevin.stop();
           
-
-          console.log('oops!')
           
           RESET();
           
         }
-        asteroids[i].render();
-        asteroids[i].update();
-        asteroids[i].edges();
+        
 
       }
       break;
   }
+
+ 
 }
 
 function start() {
@@ -124,6 +126,8 @@ function displayBeginGame() {
   lol.play()
 
   }
+
+  if (ifgameover== 0){
   background(bg);
   textAlign(CENTER);
   fill(255);
@@ -132,7 +136,25 @@ function displayBeginGame() {
   else fill(255);
   if (width > 1200) textFont(pixelated, 200);
   else textFont(pixelated, 100);
-  text('Avoid Asteroids', width / 2, height / 2 - 100);
+  text('Asteroids Wars', width / 2, height / 2 - 100);
+
+  textFont(pixelated, 30);
+  text("Created by JA3BU9 & GITSALAH", width / 2, height / 2 + 400);
+  
+
+  textFont('monospace', 40);
+  fill(255);
+  text("press 'ENTER' to play", width / 2, height / 2 + 40);
+} else {
+  background(bg);
+  textAlign(CENTER);
+  fill(255);
+  stroke(255);
+  if (frameCount % 45 > 22) fill(0); // make text flash
+  else fill(255);
+  if (width > 1200) textFont(pixelated, 200);
+  else textFont(pixelated, 200);
+  text('LOL U DIED!!!', width / 2, height / 2 - 100);
 
   textFont(pixelated, 30);
   text("Created by JA3BU9 & GITSALAH", width / 2, height / 2 + 400);
@@ -142,24 +164,9 @@ function displayBeginGame() {
   text("press 'ENTER' to play", width / 2, height / 2 + 40);
 
 }
-
-function gameOver() {
-
-  background(bg);
-  textAlign(CENTER);
-  fill(255);
-  stroke(255);
-  if (frameCount % 45 > 22) fill(0); // make text flash
-  else fill(255);
-  if (width > 1200) textFont(pixelated, 200);
-  else textFont(pixelated, 100);
-  text('LOL U DIED !!', width / 2, height / 2 - 100);
-
-  textFont('monospace', 40);
-  fill(255);
-  text("press 'ENTER' to play", width / 2, height / 2 + 40);
-
 }
+
+
 
 function keyReleased() {
   ship.setRotation(0);
@@ -180,6 +187,7 @@ function keyPressed() {
   } else if (keyCode == LEFT_ARROW) {
     ship.setRotation(-0.1)
   } 
+  
 }
 
 
@@ -189,7 +197,7 @@ function Asteroid(pos, s) {
   if (pos) {
     this.pos = pos.copy();
   } else {
-    this.pos = createVector(random(width), random(height));
+    this.pos = createVector(-(random(width)), -(random(height)));
   }
   if (s){
      this.r = s*0.5;
